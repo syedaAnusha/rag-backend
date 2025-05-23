@@ -1,0 +1,142 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Project specific
+# Temporary files created during processing
+temp/
+# Log files
+*.log
+# Large media files that should be downloaded rather than stored in git
+*.mp4
+# Audio temp files
+# (keep audio.mp3 since it's part of your project structure)
+temp_audio/
+sessions/
+uploads/
+indexed_docs/
+# FAISS index backups (keep the main index)
+faiss_index/backup/
+
+# Data directories
+data/processed/
+data/raw/
+documents/
+
+# Vector store files
+*.faiss
+*.pkl
+
+# Model caches
+.cache/
+.langchain.cache/
+.embeddings_cache/
+
+# Large language model specific
+*hf_cache/
+.keras/
+.torch/
+.tensorflow_cache/
+
+# Document processing temporary files
+*.pdf
+*.txt
+*.doc
+*.docx
+*.json
+!requirements.txt  # Keep requirements.txt tracked
+
+# API Keys and Configs
+*.key
+config.ini
+settings.local.py
+
+# Generated embeddings and indexes
+faiss_index/
+vector_store/
+embeddings/
+
+# Temporary processing files
+tmp/
+temp/
+
+# User-specific files
+.DS_Store
+Thumbs.db
+
+# image files
+*.png
+*.jpg
