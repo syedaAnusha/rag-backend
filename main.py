@@ -3,6 +3,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pathlib import Path
 import shutil
 import os
@@ -21,7 +22,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize RAG system at module level
+@app.get("/")
+async def root():
+    """
+    Root endpoint that provides API information and available endpoints
+    """
+    return JSONResponse({
+        "message": "Welcome to the RAG (Retrieval-Augmented Generation) API",
+        "version": "1.0.0",
+        "documentation": "/docs",
+        "endpoints": {
+            "document_management": {
+                "upload_document": "POST /upload",
+                "chat_with_documents": "POST /chat",
+                "clear_index": "DELETE /clear"
+            }
+        }
+    })
 
 # Initialize RAG system
 rag_system = RAGSystem()
