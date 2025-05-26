@@ -1,0 +1,16 @@
+run = "uvicorn main:app --host 0.0.0.0 --port 8080"
+hidden = [".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc"]
+
+[nix]
+channel = "stable-23_11"
+
+[env]
+PYTHON_VERSION = "3.11"
+
+[languages]
+
+[languages.python]
+pattern = "**/*.py"
+
+[languages.python.languageServer]
+start = "pylsp"
