@@ -9,6 +9,7 @@ services:
     environment:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - PORT=${PORT:-8001}
+      - KMP_DUPLICATE_LIB_OK=TRUE
     volumes:
       - ./data:/app/data
     restart: unless-stopped

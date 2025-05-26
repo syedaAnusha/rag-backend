@@ -1,7 +1,6 @@
 from typing import List, Tuple, Dict
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
-import numpy as np
 from langchain_core.documents import Document
 
 class CrossEncoderReranker:

@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    KMP_DUPLICATE_LIB_OK=TRUE
 
 # Install system dependencies
 RUN apt-get update && \
