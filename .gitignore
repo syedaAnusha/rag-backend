@@ -113,12 +113,13 @@ documents/
 .tensorflow_cache/
 
 # Document processing temporary files
-*.pdf
 *.txt
+!requirements.txt
+*.pdf
 *.doc
 *.docx
 *.json
-!requirements.txt  # Keep requirements.txt tracked
+
 
 # API Keys and Configs
 *.key
