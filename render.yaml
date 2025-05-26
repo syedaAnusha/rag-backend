@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: rag-backend
+    env: docker
+    plan: free
+    buildCommand: docker build -t rag-backend .
+    startCommand: docker run -p $PORT:8001 rag-backend
+    envVars:
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: PORT
+        value: 8001
