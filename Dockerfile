@@ -20,13 +20,15 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
+# Copy the rest of the application code
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p data/raw data/processed documents
+# Create necessary directories if they don't exist
+RUN mkdir -p /app/data/processed/faiss_index
+RUN mkdir -p /app/data/raw
+RUN mkdir -p /app/documents
 
-# Expose the port
+# Expose the port the app runs on
 EXPOSE 8001
 
 # Command to run the application
