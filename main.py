@@ -96,7 +96,7 @@ Updated answer:"""
         
         self.vector_store.create_vector_store(texts, metadatas)
         self.vector_store.save_vector_store()
-        return len(chunks)    
+        return len(chunks)      
     def setup_qa_chain(self, conversation_id: Optional[str] = None):
         """Initialize the QA chain with the vector store retriever."""
         if not self.vector_store.vector_store:
@@ -108,9 +108,10 @@ Updated answer:"""
         # Use memory for chat sessions
         memory = self.conversations.get(conversation_id) if conversation_id else None
 
+        # Retrieve more documents initially for better reranking
         base_retriever = self.vector_store.vector_store.as_retriever(
             search_type="similarity",
-            search_kwargs={"k": 3}  # Fixed k value
+            search_kwargs={"k": 10}  # Get more documents for reranking
         )
 
         if conversation_id:
@@ -145,8 +146,13 @@ Return only the questions as a numbered list without any introduction or explana
             if q and any(c.isdigit() for c in q[:2]):
                 q = re.sub(r'^\d+\.\s*', '', q)
                 expanded_questions.append(q)
+        # Print expanded queries for visibility
+        print("\nGenerated expanded queries:")
+        for i, q in enumerate(expanded_questions, 1):
+            print(f"{i}. {q}")
+            print()
         
-        return [question] + expanded_questions    
+        return [question] + expanded_questions      
     def query_document(self, query: str, conversation_id: str) -> tuple[str, list]:
         """Query the document using multiple query expansion and cross-encoder reranking."""
         if conversation_id not in self.conversations:
@@ -156,39 +162,67 @@ Return only the questions as a numbered list without any introduction or explana
                 output_key="answer",
                 input_key="question"
             )
-        self.setup_qa_chain(conversation_id=conversation_id)        # Generate expanded queries
+        self.setup_qa_chain(conversation_id=conversation_id)
+
+        # Generate expanded queries (fixed at 5 queries)
         expanded_queries = self.expand_query(query)
         all_docs = []
         seen_content = set()
         
-        # Process each query
+        # Process each expanded query to gather relevant documents
         for expanded_q in expanded_queries:
-            response = self.qa_chain.invoke(
-                {"query": expanded_q} if not conversation_id else {"question": expanded_q}
-            )
+            response = self.qa_chain.invoke({"question": expanded_q})
             if 'source_documents' in response:
                 for doc in response['source_documents']:
                     if doc.page_content not in seen_content:
                         all_docs.append(doc)
                         seen_content.add(doc.page_content)
-          # Apply cross-encoder reranking
+        
+        # Apply cross-encoder reranking with relevance scores
         reranked_docs = self.reranker.rerank_documents(
             query=query,
             documents=all_docs,
-            top_k=3  # Fixed k value
+            top_k=10  # Keep more relevant documents
         )
         
-        all_docs = [doc for doc, _ in reranked_docs]
+        # Prepare comprehensive context from reranked documents with scores
+        reranked_context = "\n\n".join([
+            f"[Passage {idx+1}, Relevance: {score:.3f}]\n{doc.page_content}\n[Source: Page {doc.metadata.get('page', 'Unknown')}, Chunk {doc.metadata.get('chunk', 'Unknown')}]"
+            for idx, (doc, score) in enumerate(reranked_docs)
+        ])        # Create a detailed prompt that encourages comprehensive answers
+        detailed_prompt = f"""Based on the following passages ranked by relevance to the question: "{query}"
+
+{reranked_context}
+
+Please provide a comprehensive answer that:
+1. Synthesizes information from all relevant passages
+2. Uses clear examples and relevant quotes
+3. Breaks down complex concepts into easy-to-understand parts
+4. Uses a clear structure with sections and bullet points
+5. Provides code examples if relevant
+6. Maintains natural flow between concepts
+
+Important: Do not mention page numbers, chunks, or source references in your answer.
+Focus on delivering the information in a clear, user-friendly way.
+If certain passages contradict each other, acknowledge this and explain the different perspectives.
+Previous conversation context should be considered for a coherent dialogue.
+
+Question: {query}
+"""
+        # Generate final response using conversation memory
+        conversation_history = self.conversations[conversation_id].chat_memory.messages
+        final_response = self.llm.invoke(detailed_prompt + "\n\nPrevious conversation context:\n" + 
+                                       str(conversation_history) if conversation_history else "")
         
-        # Generate final response
-        if conversation_id:
-            response = self.qa_chain.invoke({"question": query})
-            answer = response["answer"]
-        else:
-            response = self.qa_chain.invoke({"query": query})
-            answer = response.get("result", response.get("answer"))
+        answer = final_response.content if hasattr(final_response, 'content') else str(final_response)
+        
+        # Update conversation memory
+        self.conversations[conversation_id].save_context(
+            {"question": query},
+            {"answer": answer}
+        )
             
-        return answer, all_docs
+        return answer, [doc for doc, _ in reranked_docs]
 
     def clear_vector_store(self):
         """Clear the vector store and its saved files."""
