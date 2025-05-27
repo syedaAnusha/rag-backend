@@ -12,11 +12,13 @@ from src.models.schemas import ChatRequest
 from src.core.rag_system import RAGSystem
 
 app = FastAPI(title="RAG API")
+FRONT_END_URLS = os.getenv("ALLOWED_ORIGINS").split(',')
+origins = [url.strip() for url in FRONT_END_URLS if url.strip()]
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this in production
+    allow_origins=origins,  # Adjust this in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
